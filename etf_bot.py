@@ -8,26 +8,24 @@ TOKEN = '8208099153:AAH_RKGn2AaWDYN3vzYPMxDlRYuWY0538gA'
 CHAT_ID = '645537358'
 INTERVAL = 10800  # 3시간
 
-# 수정된 실제 데이터
+# 실제 데이터 (원금 = 평가액 - 수익)
 PORTFOLIO = {
     "KODEX AI반도체": {
         "ticker": "304100.KS",
-        "investment": 286448140,
-        "current_value": 352770980,
-        "profit": 66322840,
-        "current_return": 23.15
+        "current_value": 286448140,      # 평가액
+        "profit": 66322840,               # 평가이익
+        "investment": 220125300           # 원금 = 평가액 - 평가이익
     },
     "신한스노우볼인컴증권": {
         "ticker": "BOND",
-        "investment": 48120738,
-        "current_value": 67384547,
-        "profit": 19263809,
-        "current_return": 40.04
+        "current_value": 133679962,       # 적립금
+        "profit": 18681017,               # 운영수익
+        "investment": 114998945           # 원금 = 적립금 - 운영수익
     }
 }
 
 def format_krw(amount):
-    """원화 포맷팅 (예: 420,155,207 → 4억 2,015만원)"""
+    """원화 포맷팅 (예: 335,124,245 → 3억 3,512만 4,245원)"""
     if amount >= 100000000:
         uk = int(amount / 100000000)
         man = int((amount % 100000000) / 10000)
@@ -72,12 +70,15 @@ def create_portfolio_report():
     # 전체 합계 계산
     total_investment = sum(item["investment"] for item in PORTFOLIO.values())
     total_value = sum(item["current_value"] for item in PORTFOLIO.values())
-    total_profit = total_value - total_investment
+    total_profit = sum(item["profit"] for item in PORTFOLIO.values())
     total_return = (total_profit / total_investment * 100) if total_investment > 0 else 0
     
     # 개별 ETF
     kodex = PORTFOLIO["KODEX AI반도체"]
+    kodex_return = (kodex["profit"] / kodex["investment"] * 100) if kodex["investment"] > 0 else 0
+    
     shinhan = PORTFOLIO["신한스노우볼인컴증권"]
+    shinhan_return = (shinhan["profit"] / shinhan["investment"] * 100) if shinhan["investment"] > 0 else 0
     
     # 현재 시간
     now = datetime.now().strftime("%Y년 %m월 %d일 %H:%M")
@@ -88,7 +89,7 @@ def create_portfolio_report():
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-💰 <b>총 투자금</b>
+💰 <b>총 투자금(원금)</b>
    {format_krw(total_investment)}
 
 📈 <b>현재 평가액</b>
@@ -104,19 +105,19 @@ def create_portfolio_report():
 
 📊 <b>KODEX AI반도체</b> (304100.KS)
 
-💼 투자금: {format_krw(kodex["investment"])}
+💼 원금: {format_krw(kodex["investment"])}
 💰 평가액: {format_krw(kodex["current_value"])}
-📈 수익률: <b>+{kodex["current_return"]:.2f}%</b>
-💵 수익금: <b>+{format_krw(kodex["profit"])}</b>
+📈 수익률: <b>+{kodex_return:.2f}%</b>
+💵 평가이익: <b>+{format_krw(kodex["profit"])}</b>
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
 💼 <b>신한스노우볼인컴증권</b>
 
-💼 투자금: {format_krw(shinhan["investment"])}
-💰 평가액: {format_krw(shinhan["current_value"])}
-📈 수익률: <b>+{shinhan["current_return"]:.2f}%</b>
-💵 수익금: <b>+{format_krw(shinhan["profit"])}</b>
+💼 원금: {format_krw(shinhan["investment"])}
+💰 적립금: {format_krw(shinhan["current_value"])}
+📈 수익률: <b>+{shinhan_return:.2f}%</b>
+💵 운영수익: <b>+{format_krw(shinhan["profit"])}</b>
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
